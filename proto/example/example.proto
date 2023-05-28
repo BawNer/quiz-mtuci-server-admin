@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package example;
+
+option go_package = ".;example";
+
+service Example {
+  rpc GetTasks(Request) returns (Response) {}
+}
+
+message Request {
+
+}
+
+message Response {
+  repeated Task tasks = 1;
+}
+
+message Task {
+  string name = 1;
+}

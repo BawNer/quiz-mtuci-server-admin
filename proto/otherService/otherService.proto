@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package otherService;
+
+option go_package = ".;otherService";
+
+service otherService {
+  rpc Process(ProcessRequest) returns (ProcessResponse) {}
+}
+
+message ProcessRequest {
+  string name = 1;
+}
+
+message ProcessResponse {
+  string status = 1;
+}

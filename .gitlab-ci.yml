@@ -1,0 +1,19 @@
+stages:
+  - build
+
+## build stage
+build:
+  image: docker:latest
+  stage: build
+  tags: 
+    - nc-dev
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME" --build-arg secret_key=$CI_JOB_TOKEN .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME"
+    - docker rmi $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  only:
+    - tags
