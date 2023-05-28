@@ -23,12 +23,12 @@ func newQuizRoutes(handler *gin.RouterGroup, t usecase.UseCase, l logger.Interfa
 
 	h := handler.Group("/quiz")
 	h.Use(m.AuthGuard())
+	h.Use(m.IsAdmin())
 	{
 		h.GET("/", r.GetAllQuiz)
 		h.GET("/:id", r.GetQuizById)
-		h.GET("/hash/:hash", r.GetQuizByHash)
 		h.POST("/", r.SaveQuiz)
-		h.POST("/respond", r.SaveReviewerRespond)
+		h.DELETE("/:id", r.DeleteQuiz)
 	}
 }
 
@@ -48,6 +48,10 @@ func (s *serviceRoutes) GetAllQuiz(c *gin.Context) {
 		return
 	}
 
+	if quizzes == nil {
+		quizzes = make([]*entity.QuizUI, 0)
+	}
+
 	c.JSON(http.StatusOK, entity.QuizzesResponseUI{
 		Success:     true,
 		Description: "",
@@ -63,22 +67,6 @@ func (s *serviceRoutes) GetQuizById(c *gin.Context) {
 	}
 
 	quiz, err := s.t.GetQuizById(c, quizID)
-	if err != nil {
-		errorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(http.StatusOK, entity.QuizResponseUI{
-		Success:     true,
-		Description: "",
-		Quiz:        quiz,
-	})
-}
-
-func (s *serviceRoutes) GetQuizByHash(c *gin.Context) {
-	quizHash := c.Param("hash")
-
-	quiz, err := s.t.GetQuizByHash(c, quizHash)
 	if err != nil {
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -132,21 +120,20 @@ func (s *serviceRoutes) GetUserByLoginWithPassword(c *gin.Context) {
 	})
 }
 
-func (s *serviceRoutes) SaveReviewerRespond(c *gin.Context) {
-	var respond *entity.Reviewers
-	if err := c.ShouldBindJSON(&respond); err != nil {
-		errorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Error parse body, %v", err))
-		return
-	}
-
-	err := s.t.SaveReviewers(c, respond)
+func (s *serviceRoutes) DeleteQuiz(c *gin.Context) {
+	quizID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		errorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Error save reviewer %+v", err.Error()))
+		errorResponse(c, http.StatusInternalServerError, "problem when get id params")
 		return
 	}
 
-	c.JSON(http.StatusOK, entity.ReviewersResponse{
+	if err := s.t.DeleteQuiz(c, quizID); err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, entity.PositiveResponseUI{
 		Success:     true,
-		Description: "Ответ сохранен!",
+		Description: "Quiz has been removed!",
 	})
 }
