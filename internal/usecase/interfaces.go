@@ -10,7 +10,7 @@ type AnalyzeTaskIDType string
 type (
 	QuizRepo interface {
 		GetAllQuiz(ctx context.Context) ([]*entity.QuizFromDB, error)
-		GetQuizById(ctx context.Context, quizId int) (*entity.QuizUI, error)
+		GetQuizById(ctx context.Context, quizId int) (*entity.QuizFromDB, error)
 		SaveQuiz(ctx context.Context, quiz *entity.QuizUISaveRequest) (*entity.QuizUISaveRequest, error)
 		DeleteQuiz(ctx context.Context, quizID int) error
 	}

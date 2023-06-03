@@ -79,7 +79,49 @@ func (s *ServiceUseCase) GetAllQuiz(ctx context.Context) ([]*entity.QuizUI, erro
 }
 
 func (s *ServiceUseCase) GetQuizById(ctx context.Context, quizId int) (*entity.QuizUI, error) {
-	return s.repo.GetQuizById(ctx, quizId)
+	quiz, err := s.repo.GetQuizById(ctx, quizId)
+	if err != nil {
+		return nil, err
+	}
+	author, err := s.mtuci.GetUserByID(ctx, quiz.AuthorID)
+	if err != nil {
+		return nil, err
+	}
+	quiz.Author = author
+	var groups []*entity.Group
+	quiz.AccessFor = strings.ReplaceAll(quiz.AccessFor, " ", "")
+	if quiz.AccessFor != "*" {
+		groupsIDs := strings.Split(quiz.AccessFor, ",")
+		for _, v := range groupsIDs {
+			groupID, err := strconv.Atoi(v)
+			if err != nil {
+				return nil, err
+			}
+			group, err := s.mtuci.GetGroupById(ctx, groupID)
+			if err != nil {
+				return nil, err
+			}
+			groups = append(groups, group)
+		}
+	} else {
+		groups, err = s.mtuci.GetAllGroups(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &entity.QuizUI{
+		ID:        quiz.ID,
+		AuthorID:  quiz.AuthorID,
+		Author:    quiz.Author,
+		AccessFor: groups,
+		QuizHash:  quiz.QuizHash,
+		Title:     quiz.Title,
+		Questions: quiz.Questions,
+		Active:    quiz.Active,
+		CreatedAt: quiz.CreatedAt,
+		UpdatedAt: quiz.UpdatedAt,
+	}, nil
 }
 
 func (s *ServiceUseCase) SaveQuiz(ctx context.Context, quiz *entity.QuizUISaveRequest) (*entity.QuizUI, error) {

@@ -69,7 +69,7 @@ func (r *QuizRepo) GetAllQuiz(ctx context.Context) ([]*entity.QuizFromDB, error)
 	return response, nil
 }
 
-func (r *QuizRepo) GetQuizById(ctx context.Context, quizId int) (*entity.QuizUI, error) {
+func (r *QuizRepo) GetQuizById(ctx context.Context, quizId int) (*entity.QuizFromDB, error) {
 	var (
 		questionsUI []entity.QuestionsUI
 		quiz        entity.Quiz
@@ -99,10 +99,10 @@ func (r *QuizRepo) GetQuizById(ctx context.Context, quizId int) (*entity.QuizUI,
 		})
 	}
 
-	response := &entity.QuizUI{
+	response := &entity.QuizFromDB{
 		ID:        quiz.ID,
 		AuthorID:  quiz.AuthorID,
-		AccessFor: nil,
+		AccessFor: quiz.AccessFor,
 		QuizHash:  quiz.QuizHash,
 		Title:     quiz.Title,
 		Questions: questionsUI,

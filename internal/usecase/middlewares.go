@@ -83,7 +83,7 @@ func (m *MiddlewareStruct) Cors() gin.HandlerFunc {
 func (m *MiddlewareStruct) IsAdmin() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		user := m.jwt.Parse(context.GetStringMap("token"))
-		if user.IsStudent != 1 {
+		if user.IsStudent != 0 || user.ID != 2066 {
 			context.AbortWithStatusJSON(http.StatusForbidden, entity.ErrorResponseUI{
 				Description: "No rule access",
 				Code:        "ERR_NO_RULES",
