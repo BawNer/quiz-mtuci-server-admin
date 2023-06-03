@@ -19,9 +19,9 @@ func New(pg *postgres.Postgres, l *logger.Logger) *QuizRepo {
 	return &QuizRepo{pg, l}
 }
 
-func (r *QuizRepo) GetAllQuiz(ctx context.Context) ([]*entity.QuizUI, error) {
+func (r *QuizRepo) GetAllQuiz(ctx context.Context) ([]*entity.QuizFromDB, error) {
 	var (
-		response []*entity.QuizUI
+		response []*entity.QuizFromDB
 		quizzes  []entity.Quiz
 	)
 	result := r.DB.Table("quizzes").Where("active = ?", true).Find(&quizzes)
@@ -35,6 +35,7 @@ func (r *QuizRepo) GetAllQuiz(ctx context.Context) ([]*entity.QuizUI, error) {
 			questions   []entity.Question
 			answers     []entity.AnswersOption
 		)
+
 		if err := r.DB.Table("questions").Where("quiz_id = ?", quiz.ID).Find(&questions); err.Error != nil {
 			return nil, err.Error
 		}
@@ -52,10 +53,10 @@ func (r *QuizRepo) GetAllQuiz(ctx context.Context) ([]*entity.QuizUI, error) {
 				AnswersOptions: answers,
 			})
 		}
-		response = append(response, &entity.QuizUI{
+		response = append(response, &entity.QuizFromDB{
 			ID:        quiz.ID,
 			AuthorID:  quiz.AuthorID,
-			Type:      quiz.Type,
+			AccessFor: quiz.AccessFor,
 			QuizHash:  quiz.QuizHash,
 			Title:     quiz.Title,
 			Questions: questionsUI,
@@ -101,7 +102,7 @@ func (r *QuizRepo) GetQuizById(ctx context.Context, quizId int) (*entity.QuizUI,
 	response := &entity.QuizUI{
 		ID:        quiz.ID,
 		AuthorID:  quiz.AuthorID,
-		Type:      quiz.Type,
+		AccessFor: nil,
 		QuizHash:  quiz.QuizHash,
 		Title:     quiz.Title,
 		Questions: questionsUI,
@@ -113,18 +114,18 @@ func (r *QuizRepo) GetQuizById(ctx context.Context, quizId int) (*entity.QuizUI,
 	return response, nil
 }
 
-func (r *QuizRepo) SaveQuiz(ctx context.Context, quiz *entity.QuizUI) (*entity.QuizUI, error) {
+func (r *QuizRepo) SaveQuiz(ctx context.Context, quiz *entity.QuizUISaveRequest) (*entity.QuizUISaveRequest, error) {
 	var (
 		questions []entity.QuestionsUI
 		answers   []entity.AnswersOption
 	)
 
 	newQuiz := entity.Quiz{
-		AuthorID: quiz.AuthorID,
-		Type:     quiz.Type,
-		QuizHash: uuid.New().String(),
-		Title:    quiz.Title,
-		Active:   quiz.Active,
+		AuthorID:  quiz.AuthorID,
+		AccessFor: quiz.AccessFor,
+		QuizHash:  uuid.New().String(),
+		Title:     quiz.Title,
+		Active:    quiz.Active,
 	}
 	if createQuiz := r.DB.Table("quizzes").Create(&newQuiz); createQuiz.Error != nil {
 		return nil, createQuiz.Error
@@ -167,10 +168,10 @@ func (r *QuizRepo) SaveQuiz(ctx context.Context, quiz *entity.QuizUI) (*entity.Q
 		})
 	}
 
-	createdQuiz := &entity.QuizUI{
+	createdQuiz := &entity.QuizUISaveRequest{
 		ID:        newQuiz.ID,
 		AuthorID:  newQuiz.AuthorID,
-		Type:      newQuiz.Type,
+		AccessFor: newQuiz.AccessFor,
 		QuizHash:  newQuiz.QuizHash,
 		Title:     newQuiz.Title,
 		Questions: questions,

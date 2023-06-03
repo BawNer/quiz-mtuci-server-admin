@@ -38,6 +38,7 @@ func newUserRoutes(handler *gin.RouterGroup, t usecase.UseCase, l logger.Interfa
 	h := handler.Group("/users")
 	{
 		h.POST("/login", r.GetUserByLoginWithPassword)
+		h.GET("/groups", r.GetAllGroups)
 	}
 }
 
@@ -80,7 +81,7 @@ func (s *serviceRoutes) GetQuizById(c *gin.Context) {
 }
 
 func (s *serviceRoutes) SaveQuiz(c *gin.Context) {
-	var request entity.QuizUI
+	var request entity.QuizUISaveRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 		errorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Error parse request json, %s", err))
@@ -135,5 +136,19 @@ func (s *serviceRoutes) DeleteQuiz(c *gin.Context) {
 	c.JSON(http.StatusOK, entity.PositiveResponseUI{
 		Success:     true,
 		Description: "Quiz has been removed!",
+	})
+}
+
+func (s *serviceRoutes) GetAllGroups(c *gin.Context) {
+	groups, err := s.t.GetAllGroups(c)
+	if err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, entity.GroupsResponse{
+		Success:     true,
+		Description: "All groups found",
+		Groups:      groups,
 	})
 }

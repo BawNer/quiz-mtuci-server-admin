@@ -41,7 +41,7 @@ func Run(cfg *config.Config) {
 		l,
 		jwtManager,
 		repo.New(pg, l),
-		repo.NewAuthRepo(msq, l),
+		repo.NewMtuciRepo(msq, l),
 	)
 
 	handler := gin.New()

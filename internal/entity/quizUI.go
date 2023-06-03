@@ -8,7 +8,33 @@ type QuizUI struct {
 	ID        int           `json:"id"`
 	AuthorID  int           `json:"-"`
 	Author    *User         `json:"author"`
-	Type      string        `json:"type"`
+	AccessFor []*Group      `json:"accessFor"`
+	QuizHash  string        `json:"quizHash"`
+	Title     string        `json:"title"`
+	Questions []QuestionsUI `json:"questions"`
+	Active    bool          `json:"active"`
+	CreatedAt time.Time     `json:"createdAt"`
+	UpdatedAt time.Time     `json:"updatedAt"`
+}
+
+type QuizUISaveResponse struct {
+	ID        int           `json:"id"`
+	AuthorID  int           `json:"-"`
+	Author    *User         `json:"author"`
+	AccessFor []*Group      `json:"accessFor"`
+	QuizHash  string        `json:"quizHash"`
+	Title     string        `json:"title"`
+	Questions []QuestionsUI `json:"questions"`
+	Active    bool          `json:"active"`
+	CreatedAt time.Time     `json:"createdAt"`
+	UpdatedAt time.Time     `json:"updatedAt"`
+}
+
+type QuizUISaveRequest struct {
+	ID        int           `json:"id"`
+	AuthorID  int           `json:"-"`
+	Author    *User         `json:"author"`
+	AccessFor string        `json:"accessFor"`
 	QuizHash  string        `json:"quizHash"`
 	Title     string        `json:"title"`
 	Questions []QuestionsUI `json:"questions"`

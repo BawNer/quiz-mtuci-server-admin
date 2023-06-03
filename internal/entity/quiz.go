@@ -41,10 +41,23 @@ type Question struct {
 type Quiz struct {
 	ID        int       `json:"id"`
 	AuthorID  int       `json:"authorId"`
-	Type      string    `json:"type"`
+	AccessFor string    `json:"accessFor"`
 	QuizHash  string    `json:"quizHash"`
 	Title     string    `json:"title"`
 	Active    bool      `json:"active"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type QuizFromDB struct {
+	ID        int           `json:"id"`
+	AuthorID  int           `json:"-"`
+	Author    *User         `json:"author"`
+	AccessFor string        `json:"accessFor"`
+	QuizHash  string        `json:"quizHash"`
+	Title     string        `json:"title"`
+	Questions []QuestionsUI `json:"questions"`
+	Active    bool          `json:"active"`
+	CreatedAt time.Time     `json:"createdAt"`
+	UpdatedAt time.Time     `json:"updatedAt"`
 }
