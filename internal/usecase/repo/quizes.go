@@ -24,7 +24,7 @@ func (r *QuizRepo) GetAllQuiz(ctx context.Context) ([]*entity.QuizFromDB, error)
 		response []*entity.QuizFromDB
 		quizzes  []entity.Quiz
 	)
-	result := r.DB.Table("quizzes").Where("active = ?", true).Find(&quizzes)
+	result := r.DB.Table("quizzes").Where("active = ?", true).Order("id desc").Find(&quizzes)
 	if result.Error != nil {
 		return nil, fmt.Errorf("quiz repo err %v", result.Error)
 	}
